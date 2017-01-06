@@ -1,0 +1,30 @@
+main ui
+CKMessagesController
+  _conversationListController
+    tableview - the list of the conversations.
+
+1.detect whether could send iMessage.
+address to ckconversion.
+  for any receipt get the ckconversation and check.
+how to generate ckconversation from address.
+ckconversationlist.
+ckreceipetselectioncontroller.updatebackfillfornewreciepts.
+cktranscriptcontroller.didselectconversation.
+cktranscriptcontroller.refreshtranscriptwithanimation.
+cktranscriptcontroller.updateentryview.
+ckmessageview.setplaceholder
+
+* frame #0: 0x34b42534 ChatKit`<redacted>      [CKConversationList conversationForHandles:create:
+  frame #1: 0x34b8f17a ChatKit`<redacted> + 78 [CKMessagesAppPreferredServiceManager _optionsForRecipients
+  frame #2: 0x34b77396 ChatKit`<redacted> + 30 [CKPreferredServiceManager _preferredServiceForHandles:newComposition:checkWithServer:error]
+  frame #3: 0x34b76d12 ChatKit`<redacted> + 58 [CKPreferredServiceManager preferredServiceForMFComposeRecipients:newComposition:checkWithServer:error:
+  frame #4: 0x34b837e0 ChatKit`<redacted> + 184 [CKComposeRecipientView updatePreferredServiceForRecipients:
+  frame #5: 0x34b83996 ChatKit`<redacted> + 46 CKComposeRecipientView reflow
+  frame #6: 0x34b84240 ChatKit`<redacted> + 156 [CKComposeRecipientView addRecipient:
+  frame #7: 0x34b267e4 ChatKit`<redacted> + 144 [CKRecipientSelectionController composeRecipientView:didFinishEnteringAddress:
+
+CKPreferredServiceManager availabilityForAddress:onService:checkWithServer
+
+[[CKPreferredServiceManager sharedPreferredServiceManager] availabilityForAddress:@"15211099731" onService:@"iMessageService" checkWithServer:YES]
+
+2.send the message.
