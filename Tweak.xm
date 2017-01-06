@@ -1,34 +1,46 @@
-/* How to Hook with Logos
-Hooks are written with syntax similar to that of an Objective-C @implementation.
-You don't need to #include <substrate.h>, it will be done automatically, as will
-the generation of a class list and an automatic constructor.
+#import "Tweak.h"
 
-%hook ClassName
+%hook CKTranscriptController
 
-// Hooking a class method
-+ (id)sharedInstance {
-	return %orig;
+#fuck mrc
+#usage:
+#  cycript -p MobileSMS
+#  find CKTranscriptController
+#  choose(CKTranscriptController) or
+#  @import com.tyilo.utils;  find_subview_controllers();
+#  [#0x1898b600 sendIMessage:@"123456789" message:@"Happy the sheep year" checkWitServer:YES]
+
+%new
+- (void)sendIMessage:(NSString*)address message:(NSString*)message checkWithServer:(BOOL)checkServer {
+  int result = [[NSClassFromString(@"CKPreferredServiceManager") sharedPreferredServiceManager]
+        availabilityForAddress:address onService:[NSClassFromString(@"IMService") iMessageService] checkWithServer:checkServer];
+  if (result == 0) {
+    NSLog(@"address %@ does not support iMessage service", address);
+    return;
+  } else if (result == 1) {
+    IMAccount* account = [[NSClassFromString(@"IMAccountController") sharedInstance] __ck_bestAccountForAddress:address];
+    id handle = [account imHandleWithID: address];
+    CKConversation* conversation = [[NSClassFromString(@"CKConversationList") sharedConversationList] conversationForHandles:[NSArray arrayWithObject:handle] create:true];
+    CKComposition* composition = [[NSClassFromString(@"CKComposition") alloc] initWithText:[[NSAttributedString alloc] initWithString:message] subject:@""];
+    id message = [conversation newMessageWithComposition:composition addToConversation:true];
+    [conversation sendMessage:message onService: [NSClassFromString(@"IMService") iMessageService] newComposition:true];
+  } else if (checkServer && result == -1) {
+    %log;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+      NSMethodSignature * mySignature = [NSMutableArray instanceMethodSignatureForSelector:@selector(sendIMessage:message:checkWithServer:)];
+      NSInvocation * invocation = [NSInvocation invocationWithMethodSignature:mySignature];
+      [invocation setTarget:self];
+      [invocation setSelector:@selector(sendIMessage:message:checkWithServer:)];
+      NSString* addr = [address copy];
+      NSString* msg = [message copy];
+      BOOL check = checkServer;
+      [invocation setArgument:&addr atIndex:2];
+      [invocation setArgument:&msg atIndex:3];
+      [invocation setArgument:&check atIndex:4];
+      [invocation invoke];
+      %log;
+    });
+  }
 }
 
-// Hooking an instance method with an argument.
-- (void)messageName:(int)argument {
-	%log; // Write a message about this call, including its class, name and arguments, to the system log.
-
-	%orig; // Call through to the original function with its original arguments.
-	%orig(nil); // Call through to the original function with a custom argument.
-
-	// If you use %orig(), you MUST supply all arguments (except for self and _cmd, the automatically generated ones.)
-}
-
-// Hooking an instance method with no arguments.
-- (id)noArguments {
-	%log;
-	id awesome = %orig;
-	[awesome doSomethingElse];
-
-	return awesome;
-}
-
-// Always make sure you clean up after yourself; Not doing so could have grave consequences!
 %end
-*/
