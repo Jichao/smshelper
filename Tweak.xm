@@ -1,14 +1,11 @@
 #import "Tweak.h"
 
-%hook CKTranscriptController
+%hook SMSApplication
 
-#fuck mrc
-#usage:
-#  cycript -p MobileSMS
-#  find CKTranscriptController
-#  choose(CKTranscriptController) or
-#  @import com.tyilo.utils;  find_subview_controllers();
-#  [#0x1898b600 sendIMessage:@"123456789" message:@"Happy the sheep year" checkWitServer:YES]
+//fuck mrc
+//usage:
+//  cycript -p MobileSMS
+//  [UIApp sendIMessage:@"123456789" message:@"Happy the sheep year" checkWithServer:YES]
 
 %new
 - (void)sendIMessage:(NSString*)address message:(NSString*)message checkWithServer:(BOOL)checkServer {
@@ -29,7 +26,7 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
       NSMethodSignature * mySignature = [NSMutableArray instanceMethodSignatureForSelector:@selector(sendIMessage:message:checkWithServer:)];
       NSInvocation * invocation = [NSInvocation invocationWithMethodSignature:mySignature];
-      [invocation setTarget:self];
+      [invocation setTarget:[UIApplication sharedApplication]];
       [invocation setSelector:@selector(sendIMessage:message:checkWithServer:)];
       NSString* addr = [address copy];
       NSString* msg = [message copy];
